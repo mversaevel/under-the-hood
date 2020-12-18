@@ -1,0 +1,849 @@
+---
+title: How do financial markets react to long term development of industries?
+author:
+  - name: M.H.M. Versaevel
+    email: m.h.m.versaevel@tilburguniversity.edu
+    affiliation: Tilburg University
+    footnote: This is the first draft of this working paper. I would like to thank Joost Driessen for valuable comments and support. Any errors are my own. Feedback and suggestions are much appreciated.
+address:
+  - code: Tilburg University School of Economics and Management (TiSEM)
+    address: Warandelaan 2, Tilburg, Netherlands, 5037AB 
+abstract: |
+  We develop quantitative methodologies to classify industries by their development phase and apply this to analyze whether stock markets over- or underreact to industries shifting to another phase of development. We find little evidence for such market inefficiencies. On the contrary, a substantial portion of the (negative) excess returns for growing (declining) industries are earned in the run-up to the phase shift. These results suggest that stock markets reflect the information with regards to industrial development in stock market prices in the run-up to an industry entering a new phase. Consequently, bubbles at the industry level may be more of an exception than a rule and more difficult to identify ex-ante than sometimes thought.
+
+journal: "n/a. This is a working paper"
+date: "`r Sys.Date()`"
+bibliography: References.bib
+output: 
+  rticles::elsevier_article:
+    includes:
+      in_header: preamble.tex
+csl: apa.csl
+---
+
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+options(scipen = 999)
+
+source("10 Scripts/99_Custom_Functions.R")
+
+library(dplyr)
+library(ggplot2)
+library(kableExtra)
+library(knitr)
+library(patchwork)
+#lmtest::
+#sandwich::
+#moments::
+#car::
+#FactoMineR::
+#factoextra::
+#ggpubr::
+
+
+
+
+```
+
+## Introduction
+
+The research question central to this paper is: how do stock markets incorporate information with respect to the long term development of industries? Do growing, innovative industries generate higher rates of return, as conventional wisdom argues? And at what point do stock markets recognize this? Do they timely and accurately reflect all relevant information, or are investors prone to under- or overreact? And are the effects similar for declining industries? To answer these questions, we develop new methodologies to systematically classify industries by phase of development (e.g. growing, declining, etc.).
+
+We find evidence that differences in industries' phase of development, are associated with differences in excess return. These results are found both in explanatory regressions where current phase is related to current excess returns, as well as in predictive regressions, where current phase is related to forward excess returns. Growing industries are associated with positive excess returns; whereas the opposite holds for declining industries. The effects are significant and moderately material in terms of explanatory power. 
+
+Looking more closely at _changes_ in industrial development, we find no evidence that financial markets overreact or underreact to industries shifting to another phase of development. On the contrary, we find that a substantial portion of the (negative) excess returns for growing (declining) industries are earned in the run-up to the phase shift. This suggests that markets do respond to information relating to industrial development and gradually reflect the information in market prices in the run-up to an industry entering a new phase.
+
+In essence, the questions in this paper lie at the heart of the literature on asset pricing and behavioral finance, as these relate to markets' reaction to new information. Yet in this paper, we propose a novel perspective for addressing the particular question on pricing at the industry level. The literature on industrial development is rich with descriptions of the evolutionary stages of industries, sometimes called the product life cycle (PLC) or industry life cycle [e.g. @Gort1982; @Jovanovic1994; @Klepper1996; @Mazzucato1999; @Perez2002; Maksimovic2008]. We build on this literature to construct two models for classifying industries by their developmental stage. These models can be systematically implemented to allow for a direct empirical study of these phenomena. 
+
+Often, studies on industrial development tend to be anecdotal and descriptive, focusing on a pre-selected industry or group of industries (e.g. infrastructure [@Grubler1990], tires [@Jovanovic1994], automobiles [@Mazzucato1999], cement [@Nishiwaki2016], chemicals [@Lieberman1990]). The industries are commonly selected because of some interesting property: a speculative boom, a key technology, etc. While understandable from the perspective of descriptive research, this does invite a selection bias, as the interesting property might not have been known or salient in advance. It leaves a number of questions unanswered. How applicable are these findings to _all_ industries, also including industries that are not commonly studied? How can these findings be used by real world investors, who must decide to allocate to industries in advance, not ex-post? And how do these findings apply to industries that are in decline? This paper is one of the few to systematically investigate the level of industrial developments per industry for the entire economy (e.g. @DellaVigna2007 and @Maksimovic2008 also aggregate across many industries).
+
+Using data from Compustat and CRSP, we construct two distinct phase models, covering a period from 1950 to 2018. Industries are classified by phases in the industry life cycle (e.g. growing, consolidating, declining) by pre-specified, systematic rules. It is shown that the models' transition through the phases occurs, by and large, in logical stepwise fashion (i.e. from phase 1 to 2, etc.). The different phases for each model are sufficiently distinct and show decent overlap with the similar phase of the other model (i.e. decline in model 1 fits decline in model 2). We then perform a number of regressions, looking at both contemporaneous and future mean excess returns for each of the phases. We find (mostly) statistically significant differences. Moreover, the phases also differ by higher order moments, like standard deviation, skewnewss and kurtosis. Next, we study what happens in advance of and after a _shift_ to another phase. We find that a substantial portion of the (negative) excess returns for growing (declining) industries are earned in the run-up to the phase shift and do not revert afterwards.
+
+To the best of our knowledge, this paper is the first to systematically classify industries by stages of industrial development (i.e. the PLC) and directly study the effects of industrial development on asset prices. The systematic approach of classifying industries by phases comes with a number of challenges involving measurement and operationalization. In particular, some of the findings in this paper raise the question whether commonly used industry classification systems are fit for studying _changes_, especially on a longer time horizon. We see this particularly in the model that uses the most direct translation of the PLC to classify phases (later referred to as model 1). In the earlier years, the average industry is assigned a more "growth-like" phase, whereas in later years, this shifts to more "decline-like". New technologies and potentially new industries continuously dawn, but we only start to classify them as such when they have proven successful. From an industry classification perspective, the present day market is always more mature than the historical. Although we will briefly discuss the properties of industry classification systems, an in-depth review of this topic falls outside the scope of this paper.
+
+The remainder of this paper is structured as follows. Section 1 given an overview of the literature on industrial development and asset pricing. In section 2, the two phase models are presented. Section 3 describes the empirical procedures and results. Section 4 concludes.
+
+## Section 1: literature overview
+
+### Industrial development and economic change
+
+The fact that industries develop and change through time has been well documented in the literature. The rise of canals and industrialization at the turn of the 19th century, railroads and steel production during the 19th century, oil and petroleum refining and automobiles in the early 20th century and the rise of chip manufacturing, IT and digitalization in the second half of the 20th century and early 21st century. As a direct consequence of these developments, incumbent technologies and industries become either completely obsolete or dramatically less prevalent in the economy. Can we better understand some of the key characteristics underlying these changes?
+  
+In terms of definition and scope, in this paper we focus on industrial development regardless of the sources of change. These can be technological improvements, but also changes in societal preferences and developments in organizational structure. Technological change cannot be seen in isolation from the societies in which these innovations are developed. This is not an uncommon view in the literature on industrial development [e.g. @Metcalfe1998, p.11]. Moreover, it is worth noting that a large portion of the literature deals with industrial change in relation with industrial structure. The latter being measured by metrics such as market concentration [@Gort1982]; R&D [@Acs1988]; differences between firms within and industry, for instance with regards to size, performance and profit margins [@Beesley1984, @Dosi1995].
+
+The literature offers a number of 'stylized facts' about how changes propagate across industries and the economy:
+
+1. The uptake of new technologies is not necessarily immediate. Crude oil had its application in industries before the great boom around the 20th century. Semiconductors had been around for decades before the development of the microchip by IBM triggered massive changes on the IT front [@Perez2002, p. 13]. The point at which technologies start to spread and the speed at which they do so, can be different per geography (see also @Grubler1990). 
+2. Key technological innovations, once developed, are not confined to one or two industries, but may come to affect and even redefine a great many industries [@Perez2002]. Moreover, they can originate across multiple industries or in a very specific group of companies within a subindustry [@Dosi1995].
+3. The product life cycle (PLC) can be used to describe developments in industries. The PLC, commonly taught in business schools, classifies products by distinct stages such as birth, growth, maturity and decline [@Gort1982]. In many cases, product (markets) and industries overlap, but products tend to be the focus [@Gort1982; @Jovanovic1994].
+4. Studies on declining industries are difficult to find. A phrase that is sometimes used in the popular literature is "sunset industries". Most papers on declining industries focus on a small selection of industries, such as the cement [@Nishiwaki2016] or chemicals [@Lieberman1990] industry. The general definition of a declining industry is a substantial and structural decrease in output.
+
+So far, we conclude from the literature that industrial development is a difficult subject to capture in measurement and that there are no direct precedents for systematically translating industries to phases. Yet the literature does offer indirect approaches. The most suitable framework to structure the empirical analysis is through the PLC. This framework has a foundation in the literature and enables a systematic approach to studying industrial change instead of a descriptive one. It should also allow us to study declining industries, a topic that generally receives less attention in the literature. In section 2, a more detailed description of the proposed model(s) will follow.
+
+### Industrial development and asset pricing
+
+This paragraph explores how information pertaining to the development of industries is reflected in stock market prices. Questions surrounding the dissipation of information in financial markets have been studied for decades. From the perspective of the literature on market efficiency, one could argue that all relevant (public) information is reflected in current market prices [@Fama1970]. However, there is a sizable literature that suggest markets might not always reflect all relevant information (e.g. @Lo2007 for an overview). This is especially true for complex, long horizon and continuous information (vs. "breaking news"). Industrial development can most certainly be called a complex and long horizon topic, as illustrated by the literature review on industrial development. It is more difficult to judge whether or not industrial development can be classified as "breaking news" type of information. New technological developments are certainly prone to becoming a hype, but do not need to be.
+
+@DellaVigna2007 provide evidence that the stock market does not fully take into account material information from demographics. The authors reason that this may be caused by the short term (up to 5 years) horizon financial analysts assume in their earnings expectations that are disseminated to the market. @Da2013 find evidence suggesting that the continuous flow of information is not associated with long-term return reversals, whereas the more discrete information flow is - which is evidence of investor overreaction. Analysts have also been shown to overreact to “breaking news” about information that had been in the public domain for some time through similar media outlets [@Huberman2001]. 
+
+Another argument for potential mispricing comes from the literature on investment factors. A part of the research suggests that  innovation is positively related to future returns. @Hirshleifer2013 construct a factor called Innovation Efficiency (IE). IE is a ratio of number of patents/citations over R&D expense and is therefore a measure of the effectiveness of R&D expenditures. IE is associated with excess returns after controlling for firm characteristics and common risk factors. @Cohen2012 find that historically successful innovations are predictors for future successful innovations: firms with a strong track record of successful innovation are likely to persistently show successful innovations going forward. Consequently, the authors find that a portfolio that takes advantage of this information earns substantial excess returns. On the other hand, innovation is commonly associated with intangible characteristics and growth-like stocks. Stock markets have long been known to overreact to growth information. @Lakonishok1994 show that stocks with high recent earnings growth (_"glamour stocks"_) are more likely to underperform going forward than stocks with lower recent earnings growth. @Daniel2006 extend these findings by showing that the underperformance of growth stocks is stronger for firms with a higher proportion of intangible assets versus tangible assets. 
+
+Finally, industrial development and technological innovation can simply be surrounded with extreme uncertainty. This makes information dissipation and market behaviour appear irrational, but that is simply a reflection of uncertainty. This line of thought can be found in @Pastor2009, who construct a model in which technological innovation that involves various degrees of uncertainty leads to formation of bubbles in asset prices that are observable ex-post but not predictable ex-ante. This model can predict some of the empirical findings in the rise of the railroad industry (19th century) and internet (end of 20th century): stock prices of firms that are operating in innovative industries initially surge and then crash after a while. Whereas @Pastor2009 propose that these bubbles are rational and can be explained through the uncertainty caused by innovation, Shiller (2000) suggested these bubbles to be typical manifestations of markets’ irrational behaviors. @Mazzucato1999 study the relation between market share instability of a firm and its stock price volatility. The authors propose that the puzzle that stock price volatility is higher than traditional finance theory predicts, can in part be explained by the uncertainty stemming from industrial development and change. @Hoberg2010 specifically study industry booms and busts. Their results show that industries showing high levels of industry valuation are related to lower operation performance and future stock returns; but that this relationship only applies for highly competitive industries, not for concentrated industries. Related research on performance differences between stocks in competitive versus concentrated industries suggests that stocks in more concentrated industries perform worse [@Hou2006]. The authors propose that companies in more concentrated industries are insulated from competitive forces through barriers to entry and are therefore less motivated to innovate. The reduced investments in innovation are believed to cause eroding profits and lower stock returns in the future.
+
+### Research questions
+
+The combined literature on asset pricing and industrial development leaves open a set of questions that this paper intends to address more directly. The asset pricing literature points to a number of channels through which the market expectations from industrial development on new industries may be wrong or not always fully informative. Industrial development comes with difficult-to-process information over a long time horizon; these characteristics increase the likelihood that financial markets do not fully reflect the information. This leads us to the following expected answer on the first research question:
+
+- Research question I: We expect that differences in the stage of development of industries are associated with differences in excess returns, looking at both contemporaneous and predictive regressions.
+
+Next, we are not just interested in abnormal returns, but the information dissipation. To begin with growing industries, these may or may not have a "breaking news" type of media attention surrounding it. Some innovations will be broadly anticipated, others may enter the scene much more quietly. The expected effect on the market (overreaction vs underreaction) will also be different. We suspect that markets will under or overreact, but are indifferent to which we will find:
+
+- Research question II: We expect that financial markets do not properly reflect information about the long term development of industries classified as _growing_. This might be caused through either under- or overreaction.
+
+It is even more difficult to describe the development of declining industries, as the literature is mainly applicable to growing industries. It is therefore not unfair to propose that industries decline quietly and gradually. Based on the literature on gradual information dissipation and investor inattention, we suggest that investors overlook the information and underreact to information on the decline of industries.
+
+- Research question III: We expect that financial markets do not properly reflect information about the long term development of industries classified as _declining_. The information is overlooked and investors show signs of underreaction.
+
+
+## Section 2: Data and methodology
+
+An important contribution of this paper is that it systematically classifies industries in phase of development. The classification itself is based on the descriptions in the literature on the life cycle of products and industries. Two models are proposed. This section describes the construction of these phase models and the dataset by which they were constructed.
+
+### How to define industries?
+
+Investigating industries begins with having a classification system. This section describing the main considerations around choosing an industry classification system. @Bhojraj2003 provide an overview of the several industry classification systems available. A distinction is made between industry classification systems (1) for governmental, corporate and reporting purposes (e.g. SIC, NAICS), (2) for the academic community (e.g. Fama French industries) and (3) for practitioners (GICS). The number of different classification systems are found to have been growing over time [@Phillips2016] and the disagreement between classification systems can be substantial [@Kahle1996]. There is evidence that industry classification systems that are based on fundamental characteristics show stronger commonalities (also out of sample), versus statistical clustering methodologies [@Chan2007; @Lamponi2014]. A novel approach to industry classification has been proposed by Hoberg and Phillips [-@Hoberg2016; -@Hoberg2018]. They use textual analysis of product descriptions by companies in their 10K reports to classify the level of product similarity between companies. This makes it a much more dynamic approach. The importance of a more dynamic approach to industrial classification is echoed by @Katselas2019, who demonstrate that a dynamic GICS industry classification performs better statistically than a static GICS source.
+
+For this paper, the GICS industry classification system was used, on level 4 (“sub industry”). The primary reasons for this are practical: GICS is available over a reasonably long period of time in Compustat. A long time horizon is a key requirement to adequately address the research questions in this paper. It is also widely used in practice. The sub industry level offers the highest granularity in the GICS classification, distinguishing approximately 160 different industries. An advantage of a more granular approach, is that it allows for a larger sample. A sufficiently large sample size is particularly important for the first model that will be explained shortly. Having said that, we do acknowledge some of the inherent limitations. Primarily, industry classifications are prone to hindsight bias, meaning that new/changing industries are defined once they have reached a certain level of success. Companies are then classified ex-post based on a classification system that wasn't known/specified at a particular point in time. A concrete example is the _Internet Software & Services (451010)_ industry. It first appears in this paper's sample in 1966. At that time, the internet did not yet exist and its predecessors were still under development. Moreover, it is not clear to what extent GICS accommodates looking at _changes_ and _development_ in industries, as it wasn't specifically designed for that purpose.
+
+### Data
+
+Fundamental data on companies, such as sales, market capitalization and industry data, were downloaded from Compustat. The fundamental data were then merged by CRSP database (using CRSP's matching of CRSP _permco_ and Compustat _gvkey_ identifiers) in order to add financial market metrics, such as stock returns. The combined data covered the period 1950-2018, and contained yearly data. The data were then aggregated from a company to an industry level. Industry returns were calculated using value weighted returns from the individual companies, to prevent a number of very small companies to distort the results. For the fundamental metrics, long horizon growth rates were calculated - by default on a horizon of 10 years - on a rolling, annual basis.
+
+This paper relies solely on data from public companies based in the United States. We feed the fundamental data from Compustat into our models to classify industries by level of development. In doing so, we might classify an industry as "Growth" that would not be classified as such when also incorporating non-listed companies. That this is not a hypothetical matter is shown by @Ali2009, who find that using only listed versus both listed and unlisted companies matters greatly when measuring industry concentration. Since this paper is interested in stock market returns, we believe it is less of an issue to use a sample that is limited to the public market. In studying stock market reactions, we are very explicit that our results are first and foremost applicable to the stock market instead of the broader economy.
+
+
+### Phase model I
+
+The literature on industrial development and innovation offers guidance on how to perform the classification into phases. A number of papers describe the various phases that are distinguished in industrial and product development, most notably those of @Gort1982 (later expanded upon by @Mazzucato1999) and @Klepper1996. Each phase has its key characteristics, primarily in terms of dynamics in sales, margins, market share, concentration net entry and number of producers. However, there is no generally accepted theory stating the number of phases. Moreover, considerable leeway exists in selecting the precise variable definitions and thresholds. We base the first phase model on the literature as well as possible. The variables and definitions are shown in table \ref{tab:TableVariablesModel1}.
+
+```{r TableVariablesModel1, fig.cap = "\\label{tab:TableVariablesModel1}"}
+
+OutputTable <- data.frame("Phase" = c(rep("Phase I: Birth phase", 3), 
+                                      rep("Phase II: Growth phase", 3), 
+                                      rep("Phase III: Shake out", 3), 
+                                      rep("Phase IV: Consolidation", 3), 
+                                      rep("Phase V: Decline", 3)),
+                          
+                          "Variable" = c("Small market by output",
+                                         "Small market by number of producers",
+                                         "High sales growth",
+                                         
+                                         "Fast growth of number of producers",
+                                         "High sales growth",
+                                         "Highly instable market shares",
+                                         
+                                         "Net entry around 0", 
+                                         "High turbulence",
+                                         "Declining profit margins", 
+                                         
+                                         "Net entry negative", 
+                                         "No growth of sales",
+                                         "Highly stable market shares",
+                                         
+                                         "Net entry negative", 
+                                         "Declining sales",
+                                         "Negative sales growth"),
+                          
+                          "Metric" = c("Abs sales: Bottom 30%", 
+                                       "Abs #producers: Bottom 30%",
+                                       "CAGR sales: Top 80%",
+                                       
+                                       "CAGR #producers: Top 80%", 
+                                       "CAGR sales: Top 80%", 
+                                       "Abs market share instability: Top 80%",
+                                       
+                                       "CAGR #producers: -3% <= x <= 3%",
+                                       "Abs industry turbulence: Top 70%",
+                                       "Growth profit margin: Bottom 30%",
+                                       
+                                       "CAGR #producers: <= 0%", 
+                                       "CAGR sales: -2% <= x <= 2%",
+                                       "Abs market share instability: Bottom 30%",
+                                       
+                                       "CAGR #producers: <= 0%",
+                                       "CAGR sales <= 0%",
+                                       "CAGR sales: Bottom 30%")
+                                        )
+
+kable(OutputTable[,1:3], "latex", booktabs = TRUE, caption = "Variables and definitions for each phase in model 1") %>%
+  kable_styling(latex_options = c("hold_position", "scale_down")) %>%
+  collapse_rows(columns = 1) #%>%
+  #column_spec(1, width = "1in") %>%
+  #column_spec(2, width = "1in") %>%
+  #column_spec(3, width = "1in")
+
+
+```
+
+Model 1 is designed to reflect the distinct phases in the life cycle of industries, as described by the literature, as accurately as possible. As a result of this approach, it is virtually impossible for an industry in a given year to, at all times, fall in exactly one phase (and not more and not less). There might be cases where an industry's characteristics meet the criteria of two phases; or none. Therefore, a hierarchy has to be used. Here, we have decided to assign the industries in the order from phase 1 to phase 5. This means that if the criteria for phase 1 are not met, the check is performed for phase 2; if they are not met, for phase 3, and so on. If at one point the criteria are met, the industry is assigned in that phase. This also means that an industry may not always be assigned to a phase. These cases will be assigned the label "no phase" and will not enter into the empirical analysis.
+
+After having assigned the phases, we can look at some of the properties of the model. The fundamental idea behind the PLC is that industries transition step wise through phases, from birth to decline. In practice, we would not expect to see such a strict linear evolution to always hold, especially in a simplified model. But ideally, we would like to see some evidence of this feature. For this purpose, a transition matrix has been constructed, shown in table \ref{tab:TransitionMatrixModel1}.
+
+```{r TransitionMatrixModel1, fig.cap = "\\label{tab:TransitionMatrixModel1} "}
+
+df_IntDataModel1 <- readRDS("01 Processed Data/lst_IntDataModel1.rds")$PhaseDataModel1gsubind10yr
+  
+TableDataModel1 <- CreateTransitionMatrix(df_Data = df_IntDataModel1, 
+                                    str_PhaseInput = "PreviousPhaseToCurrentPhaseExclNoPhase", OutputProbabilities = TRUE, Formatted = TRUE)
+
+TableDataModel1 <- TableDataModel1[-6, -6]
+
+knitr::kable(TableDataModel1, "latex", booktabs = TRUE, caption = "Model 1: Transition matrix showing the transition to the current phase from the previous phase (from is at t=-1; to is at t=0)") %>%
+  kable_styling(latex_options = c("hold_position")) %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(1, bold = TRUE)
+
+```
+
+The matrix exhibits two key properties: first, high percentages on the diagonal show that the probability of staying in a given phase is quite high. Second, the transition matrix offers some evidence of step wise transition through the model. For instance, in state phase 1, the odds are `r TableDataModel1[1, 1]` for remaining in that phase and `r TableDataModel1[1, 2]` of transitioning to the next phase (phase 2). The same pattern can be seen in phases 3, 4 and 5. We conclude that the model exhibits a good balance between stability (not too many phase changes) and the changes that do occur, go to nearby phases.
+
+### Phase model II
+
+The second model is closely related to the model constructed by @Maksimovic2008. The model consists of two dimensions: (1) growth in the number of producers in an industry and (2) growth of the output. In the original study, the authors define output by volume of shipments. In this paper this has been translated to sales, which can also be considered a measure of output. Growth in number of producers is similar in both studies. Based on these dimensions, an industry is labeled as scoring either above or below the median on these metrics. Medians are calculated cross-sectionally. The quadrant in figure \ref{fig:QuadrantModel2} shows the mapping of these four phases on the two dimensions.
+
+```{r QuadrantModel2, fig.align = "center", out.width = "70%", fig.cap = "\\label{fig:QuadrantModel2} Graphical presentation of Model 2"}
+
+### inspired by https://stackoverflow.com/questions/57923246/making-a-a-four-quadrant-proportional-area-chart-in-r
+
+df <- data.frame(value = c(1, 1, 1, 1),
+                 change_in_output = c("above median", "above median", "below median", "below median"),
+                 change_in_producers = c("above median", "below median", "above median", "below median"),
+                 label = c("Phase I:", "Phase II:", "Phase III:", "Phase IV:"),
+                 label2 = c("Growth", "Consolidating", "Technological Change", "Declining"),
+                 stringsAsFactors = FALSE)
+df <- df %>% 
+  mutate(xmin = if_else(change_in_output == "below median", -sqrt(value), 0),
+         xmax = if_else(change_in_output == "above median", sqrt(value), 0),
+         ymin = if_else(change_in_producers == "below median", -sqrt(value), 0),
+         ymax = if_else(change_in_producers == "above median", sqrt(value), 0))
+
+ggplot(df) + 
+  geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), fill = "gray95") +
+  geom_text(aes(x = xmin + 0.5 * sqrt(value), y = ymin + 0.5 * sqrt(value) + 0.1, label = label), size = 5) +
+  geom_text(aes(x = xmin + 0.5 * sqrt(value), y = ymin + 0.5 * sqrt(value) - 0.1, label = label2), size = 4) +
+  coord_equal() +
+  geom_hline(yintercept = 0, alpha = 0.25) + geom_vline(xintercept = 0, alpha = 0.25) +
+  theme_minimal() +
+  theme(axis.text = element_blank(), panel.grid = element_blank()) +
+  xlab("Change in output (low ---> high)") +
+  ylab("Change in number of producers (low ---> high)")
+
+```
+
+An advantage of model 2, compared to model 1, is the relative nature of the model. By classifying using medians, an industry will at all times fall in at least one phase (and no more or less). Because of this feature, the sample size for the phases constructed in model 2 will be higher; the samples for each phase are also more balanced, as they are equally sized. Finally, these features will be constant across time, which mitigates potentially confounding effects of structural economic changes through time, that are not explicitly captured in the model. The transition matrix for model 2 is quite similar in terms of stability, but does not show a natural step wise flow like model 1 does. This is quite possibly a result of model 2's feature that each industry must be assigned a phase. In the appendix, the reader can find the the transition matrix for model 2 (table \ref{tab:TransitionMatrixModel2}).
+
+### The merits of using both model 1 and model 2
+
+The difference in the way the models are constructed makes the two models highly complementary and useful to study along side one another. This key difference can best be summarized through a graph, shown in figure \ref{fig:PhaseDevelopmentModel1Model2}. The graph shows the average phase the economy is in according to each of the two models.
+
+```{r PhaseDevelopmentModel1Model2, fig.align = "center", out.width = "75%", fig.cap = "\\label{fig:PhaseDevelopmentModel1Model2} Comparison of model 1 (left) and model 2 (right) on aggregate phase development over time", results = 'hide', message = FALSE}
+
+DataModel1 <- readRDS("01 Processed Data/lst_IntDataModel1.rds")$PhaseDataModel1gsubind10yr %>%
+  filter(Phase != 0)
+
+DataModel2 <- readRDS("01 Processed Data/lst_IntDataModel2.rds")$PhaseDataModel2gsubind10yr
+
+Plot1 <- DataModel1 %>% group_by(Year) %>% summarize(AvgPhase = mean(Phase)) %>%
+  ggplot(aes(x = Year, y = AvgPhase, group = 1)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Model 1", x = "", y = "Average Phase")
+  theme(legend.position = "none")
+
+Plot2 <- DataModel2 %>% group_by(Year) %>% summarize(AvgPhase = mean(Phase)) %>%
+  ggplot(aes(x = Year, y = AvgPhase, group = 1)) +
+  geom_bar(stat = "identity")  +
+  labs(title = "Model 2", x = "", y = "Average Phase")
+  theme(legend.position = "none")
+
+Plot1 + Plot2
+
+
+```
+
+Since the models have a different number of phases, it is not particularly interesting to compare the levels directly. It is more informative to compare the development within each model. Model 1 shows a clear transition from earlier, growth-like stages to more mature and declining stages. Since model 2 is a relative model, the aggregate phase is very stable (at around 2.5, the expected value for a uniform distribution ranging from 1 to 4).
+
+Despite the complementarity as a result of differences in the way of constructing the models, there ideally should be some coherence in the resulting outcomes. The models have a different number of phases, so we cannot directly compare _Phase 1_ of model 1 with the correspondingly numbered phase of model 2. To investigate the differences and similarities we combine the two phase models into 1 dataset, where an industry, in a given year, is assigned to a phase by model 1 and model 2. These are binary (1 if it is in model x / phase y; 0 if it is not) vectors, with each phase/model in a different column. This structure allows for easy decomposition into the principal components. Figure \ref{fig:PCA-Model1-Model2} shows how each of the variables plot on a basis with the two principal components.
+
+```{r PCA-Model1-Model2, fig.align = "center", out.width = "90%", fig.cap = "\\label{fig:PCA-Model1-Model2} PCA of phase classifications for model1 and model2"}
+
+Model1 <- readRDS("01 Processed Data/lst_IntDataModel1.rds")$PhaseDataModel1gsubind10yr %>%
+  mutate(Model1Phase1 = case_when(Phase == 1 ~ 1,
+                                  TRUE ~ 0),
+         Model1Phase2 = case_when(Phase == 2 ~ 1,
+                                  TRUE ~ 0),
+         Model1Phase3 = case_when(Phase == 3 ~ 1,
+                                  TRUE ~ 0),
+         Model1Phase4 = case_when(Phase == 4 ~ 1,
+                                  TRUE ~ 0),
+         Model1Phase5 = case_when(Phase == 5 ~ 1,
+                                  TRUE ~ 0),
+         Model1NoPhase = case_when(Phase == 0 ~ 1,
+                                  TRUE ~ 0))
+
+Model2 <- readRDS("01 Processed Data/lst_IntDataModel2.rds")$PhaseDataModel2gsubind10yr %>%
+  mutate(Model2Phase1 = case_when(Phase == 1 ~ 1,
+                            TRUE ~ 0),
+         Model2Phase2 = case_when(Phase == 2 ~ 1,
+                            TRUE ~ 0),
+         Model2Phase3 = case_when(Phase == 3 ~ 1,
+                            TRUE ~ 0),
+         Model2Phase4 = case_when(Phase == 4 ~ 1,
+                            TRUE ~ 0))
+
+Combined <- merge(Model1, Model2, by = c("Year", "IndustryName"), all.x = TRUE) %>%
+  select(IndustryVWR_Excess.x, IndustryVWR5yrForward.x, Model1Phase1, Model1Phase2, Model1Phase3, Model1Phase4, Model1Phase5, Model2Phase1, Model2Phase2, Model2Phase3, Model2Phase4, Model1NoPhase)
+
+res.PCA <- FactoMineR::PCA(Combined[,c(3:12)], ind.sup = 1:9, quanti.sup = 10, scale.unit = TRUE, graph = FALSE)
+plot.PCA <- factoextra::fviz_pca_var(res.PCA, col.var = c(rep("grey", 5), rep("blue", 4)),
+                         labelsize = 4, col.quanti.sup = "black", repel = TRUE)
+
+ggpubr::ggpar(plot.PCA,
+              ggtheme = theme_minimal(),
+              legend = "none",
+              title = "") +
+  theme(axis.title = element_text(size = 10))
+
+
+```
+
+The results from the PCA show there is a great level of similarity between Model1Phase5 and Model2Phase4 (both named Decline); Model1Phase2 and Model2Phase1 (both named Growth); and Model1Phase3 ( _"Shake-out"_ ) and Model2Phase3 ( _"Technological Change"_ ). Most importantly, the description in the literature of these overlapping phases is pretty similar: so not only do they statistically overlap, by outcome, the construct they intend to measure also overlaps. This increases confidence in the accuracy of the mapping. Of course, part of the commonalities exist by design. The fundamental data used for classification, such as sales and number of producers, are equal for both models. Also, it is worth noting there is no strong match between Model1Phase4 and Model2Phase2, even though they are both named _consolidation_. This either suggests an incorrect operationalization of this phase or a lack of clarity in the literature with respect to what the _consolidation_ phase entails.
+
+Based on the comparison, we conclude that both models are sufficiently complementary when looking at their features, but at the same time show outcomes that are quite similar. We therefore conclude that it is valuable to retain both models. 
+
+## Section 3: Results
+
+### Is there a relation between the phases and financial performance?
+
+The first empirical test looks at the relation between each of the phases and the financial performance in that same period. We define phases by industries' characteristics on an annual basis, based on that year's industry fundamentals. We use that classification to compare differences in the same year's industry returns. The industry returns are all based on value weighted returns: the returns of companies within industries contribute by their market capitalization. This provides an answer to the question whether certain phases are associated with higher (or lower) stock market performance. Finally, excess returns were calculated by subtracting the market return in a given year from an industry's return. The primary reason for using excess returns instead of absolute returns is that absolute returns can vary over time. We saw in figure \ref{fig:PhaseDevelopmentModel1Model2} that for model 1, the phase level has a (visually) strong relation with time. If the absolute returns also differ over time, which is not unlikely, this may obscure the results. Using excess returns corrects for this effect. Figure \ref{tab:Model1_RegrTable1} presents the differences in mean of the industries' returns including the regression results and the higher moments.
+
+```{r Model1_RegrTable1, fig.align = "center", out.width = "70%", fig.height = 8, fig.width = 8, fig.cap = "\\label{tab:Model1_RegrTable1}"}
+
+TableData <- readRDS("01 Processed Data/lst_IntDataModel1.rds")$PhaseDataModel1gsubind10yr %>%
+  mutate(Phase = as.factor(Phase)) %>%
+  filter(Phase != 0)
+
+Stats <- TableData %>%
+  group_by(PhaseName) %>%
+  summarize(mean = round(mean(IndustryVWR_Excess), 2),
+            sd = round(sd(IndustryVWR_Excess), 2),
+            skewness = round(moments::skewness(IndustryVWR_Excess), 2),
+            kurtosis = round(moments::kurtosis(IndustryVWR_Excess), 2))
+
+Model1_Fit1 <- summary(lm(data = TableData, IndustryVWR_Excess ~ PhaseName))
+
+OutputTable <- data.frame(Phase = sort(unique(TableData$PhaseName)),
+                          Coefficients = round(c(Model1_Fit1$coefficients[1,1], (Model1_Fit1$coefficients[2:5,1] + Model1_Fit1$coefficients[1,1])), 3),
+                          "t-value" = round(Model1_Fit1$coefficients[,3], 1),
+                          "p-value" = round(Model1_Fit1$coefficients[,4], 3),
+                          "std dev" = Stats$sd,
+                          skewness = Stats$skewness,
+                          kurtosis = Stats$kurtosis)
+
+rownames(OutputTable) <- NULL
+
+kable(OutputTable, "latex", booktabs = TRUE, caption = "Model 1: Results from regression on mean excess industry returns on an annual basis; and descriptive statistics of higher moments of excess industry returns") %>%
+  kable_styling(latex_options = c("hold_position", "scale_down"))
+
+
+```
+
+
+The mean excess return of _Phase 3: Shake-out_ (`r round(Model1_Fit1$coefficients[3, 1] + Model1_Fit1$coefficients[1, 1], 3)`) and _Phase 5: Decline_ (`r round(Model1_Fit1$coefficients[5, 1] + Model1_Fit1$coefficients[1, 1], 3)`) are significantly lower than those of the other phases. That of _Phase 1: Birth_ is higher (`r round(Model1_Fit1$coefficients[1, 1], 3)`), also with statistical significance. Moreover, the hypothesis that the means are not different from one another can be rejected (F-value: `r round(Model1_Fit1$fstatistic[1], 2)`, p-value: `r round(pf(Model1_Fit1$fstatistic[1], Model1_Fit1$fstatistic[2], Model1_Fit1$fstatistic[3], lower.tail = FALSE), 3)`. The variation in excess returns that can be explained by the phases is rather low, with an adjusted R-squared of `r round(Model1_Fit1$adj.r.squared, 3)`. Since the phases tend to capture long term industrial development, it is perhaps not surprising that yearly returns are primarily driven by other factors.
+
+Interestingly, there is substantial variation in the higher moments per phase. The standard deviation of the earlier phases ("growth-like") is somewhat higher than the standard deviation of the later ("decline-like") phases. The same goes for skewness and kurtosis; the positive skewness of the growth-like phases is congruent with the notion of "lottery"-like investments of growth companies: those with a low likelihood of a large payout. The consolidation phase is associated with much lower standard deviation and has a distribution much closer to normal with a skew of almost 0 and kurtosis of only a little above 3. 
+
+The same analysis has been performed for model 2. Table \ref{tab:Model2_RegrTable1} shows the results.
+
+```{r Model2_RegrTable1, fig.align = "center", out.width = "70%", fig.height = 8, fig.width = 8, fig.cap = "\\label{tab:Model2_RegrTable1}"}
+
+TableData <- readRDS("01 Processed Data/lst_IntDataModel2.rds")$PhaseDataModel2gsubind10yr %>%
+  mutate(Phase = as.factor(Phase))
+
+Stats <- TableData %>%
+  group_by(PhaseName) %>%
+  summarize(mean = round(mean(IndustryVWR_Excess), 2),
+            sd = round(sd(IndustryVWR_Excess), 2),
+            skewness = round(moments::skewness(IndustryVWR_Excess), 2),
+            kurtosis = round(moments::kurtosis(IndustryVWR_Excess), 2))
+
+Model2_Fit1 <- summary(lm(data = TableData, IndustryVWR_Excess ~ PhaseName))
+
+OutputTable <- data.frame(Phase = sort(unique(TableData$PhaseName)),
+                          Coefficients = round(c(Model2_Fit1$coefficients[1,1], (Model2_Fit1$coefficients[2:4,1] + Model2_Fit1$coefficients[1,1])), 3),
+                          "t-value" = round(Model2_Fit1$coefficients[,3], 1),
+                          "p-value" = round(Model2_Fit1$coefficients[,4], 3),
+                          "std dev" = Stats$sd,
+                          skewness = Stats$skewness,
+                          kurtosis = Stats$kurtosis)
+
+rownames(OutputTable) <- NULL
+
+kable(OutputTable, "latex", booktabs = TRUE, caption = "Model 2: Results from regression on mean excess industry returns on an annual basis; and descriptive statistics of higher moments of excess industry returns") %>%
+  kable_styling(latex_options = c("hold_position", "scale_down"))
+
+
+```
+
+The results for model 2 show similarities and differences. The mean excess returns of the four phases of industrial development, like those of model 1, are significantly different from one another (F-value: `r round(Model2_Fit1$fstatistic[1], 2)`, p-value: `r round(pf(Model2_Fit1$fstatistic[1], Model2_Fit1$fstatistic[2], Model2_Fit1$fstatistic[3], lower.tail = FALSE), 4)`). The adjusted R-squared is low (`r round(Model2_Fit1$adj.r.squared, 3)`). Like model 1, the decline phase has a lower excess return associated with it than the growth phase, although both t-stats are not significant. The observations we made earlier about the higher moments for the phases are somewhat different for model 2. Not growth but decline is associated with the highest skewness and kurtosis. The extremely high kurtosis of the decline phase is driven by a small number of observations. The removal of these outliers would not materially alter the results of this paper, although the kurtosis will understandably drop sharply. We therefore decide to keep them into the sample, as they do contain information on the return distribution. These extreme returns do not enter into the sample for model 1, as the industries which experience these extreme returns are not assigned to a phase in those particular years.
+
+### Is there a relation between phases and _future_ financial performance?
+
+To what extent is an industry's phase of development a predictor for future financial performance? Using the phase models, we perform predictive regressions, using the 5-year forward excess returns per industry as the dependent variable. The five year performance is expected to be more stable than one year performance figures are. Since these return metrics are calculated on a rolling basis, there might be overlapping time periods - all the more since the phases are quite stable from year to year. To correct for potential serial correlation this induces, Newey-West standard errors are used in these regressions (with a lag of 5). The results are shown in table \ref{tab:Model1and2_RegrTable1}.
+
+```{r Model1and2_RegrTable1, fig.align = "center", out.width = "70%", fig.height = 8, fig.width = 8, fig.cap = "\\label{tab:Model1and2_RegrTable1}"}
+
+TableData1 <- readRDS("01 Processed Data/lst_IntDataModel1.rds")$PhaseDataModel1gsubind10yr %>%
+  mutate(Phase = as.factor(Phase)) %>%
+  filter(!is.na(IndustryVWR_Excess5yrForward), Phase != 0)
+
+TableData2 <- readRDS("01 Processed Data/lst_IntDataModel2.rds")$PhaseDataModel2gsubind10yr %>%
+  mutate(Phase = as.factor(Phase)) %>%
+  filter(!is.na(IndustryVWR_Excess5yrForward))
+
+#perform regressions
+fit <- lm(data = TableData1, IndustryVWR_Excess5yrForward ~ PhaseName )
+Model1_Fit2 <- lmtest::coeftest(fit, vcov. = sandwich::NeweyWest(fit, lag = 5, prewhite = FALSE, adjust = TRUE))
+Model1_Fit3 <- car::Anova(fit, vcov. = sandwich::NeweyWest(fit, lag = 5, prewhite = FALSE, adjust = TRUE))
+rm(fit)
+
+fit <- lm(data = TableData2, IndustryVWR_Excess5yrForward ~ PhaseName )
+Model2_Fit2 <- lmtest::coeftest(fit, vcov. = sandwich::NeweyWest(fit, lag = 5, prewhite = FALSE, adjust = TRUE))
+Model2_Fit3 <- car::Anova(fit, vcov. = sandwich::NeweyWest(fit, lag = 5, prewhite = FALSE, adjust = TRUE))
+rm(fit)
+
+#organize results in table
+OutputTable <- data.frame(Model = c(rep("Model 1", 5), rep("Model 2", 4)),
+                          Phase = c(sort(unique(TableData1$PhaseName)), sort(unique(TableData2$PhaseName))),
+                          Coefficients = round(c(Model1_Fit2[1, 1], Model1_Fit2[2:5, 1] + Model1_Fit2[1, 1], Model2_Fit2[1, 1], Model2_Fit2[2:4, 1] + Model2_Fit2[1, 1]), 3),     
+                          "t-value" = round(c(Model1_Fit2[, 3], Model2_Fit2[, 3]), 2), 
+                          "p-value" = round(c(Model1_Fit2[, 4], Model2_Fit2[, 4]), 3))
+
+rownames(OutputTable) <- NULL
+
+kable(OutputTable, "latex", booktabs = TRUE, caption = "Results from regressing phase (for models 1 and 2) with excess industry returns for the next 5 years.") %>%
+  collapse_rows(columns = 1) %>%
+  kable_styling(latex_options = c("hold_position", "scale_down"))
+
+
+```
+
+
+When looking at 5-year forward excess returns for model 1, we find a statistically significant difference between the means of the 5-year forward returns of the phases. The model has an F-value of `r round(Model1_Fit3[1, 2], 2)` and p-value `r cut(x = Model1_Fit3[1, 3], breaks = c(0, 0.001, 0.01, 0.05, 0.1, 1), labels = c("< 0.001", "< 0.01", "< 0.05", "< 0.1", "> 0.1"))`. Like in the previous (contemporaneous) regressions, the excess returns for _Phase 5: Decline_ are lower than for the others phases, with statistical significance. Growth-like phases also show slightly negative excess returns (although not statistically significant), suggesting that the future prospects for current growth industries are not as positive as in the non-predictive regressions. The results for model 2 are also statistically significant (F-value = `r round(Model2_Fit3[1,2], 2)`, p-value `r cut(x = Model2_Fit3[1,3], breaks = c(0, 0.001, 0.01, 0.05, 0.1, 1), labels = c("< 0.001", "< 0.01", "< 0.05", "< 0.1", "> 0.1"))`). As in model 1, for model 2 the growth phase shows negative excess returns, but for model 2  with statistical significance. The decline phase also has negative returns but these are not statistically significant, in contrast with those of model 1.
+
+The results show that most (or all) excess returns are negative for all phases. This may come across as counterintuitive or plain wrong. However, it is important to point out that for model 1, not all industries are assigned with a phase at all times. Another explanation, which applies to bot models, is that these results implicitly weigh all industry returns equally, whereas the market return would weigh these by market capitalization.
+
+### Intermediate conclusion
+
+The results so far are in line with our expectations from the first research question.
+
+- Research question I: We expect that differences in the stage of development of industries are associated with differences in financial returns, looking at both contemporaneous and predictive regressions.
+
+Models that distinguish industrial development phases, have some explanatory power in stock market returns; and some predictive power for future excess returns. Based on model 1, growth like phases are associated with higher current returns, but not with future returns. The decline phase is associated with lower excess returns in current period and predictive regressions. Model 2 does not confirm growth industries' positive relation with current period excess returns (no statistical significance), but does confirm the negative excess returns in the predictive regressions. The results for the decline phase are all non-significant, so do not confirm or reject the results from model 1.
+
+The differences between the current and forward excess returns for the growth-like phases, may be explained by the financial markets' response to industrial changes. High contemporaneous returns and low forward returns suggest reversal, which is typical for overreaction. In order to address this topic more thoroughly, we will now study the transition between phases as events, and look at the returns before and after the event. 
+
+## Dynamic models: event study
+
+First we start with some methodological notes. We gather all the years for all the industries in which there has been a phase shift. We are interested in the target phase, meaning each time a new phase is entered. For example, an industry that shifts from phase 2 to phase 4 will be in the same category as an industry that moves from phase 3 to phase 4. In both cases, phase 4 is the target phase. Next, for each phase shift we gather return data from the period leading up to the shift and after the shift. Initially we look at a 5 year period before and after, so 11 years in total. We only retain data points if there is a full 11-year period available. We then calculate a market return based on the sample and calculate excess returns for each of the five phases. This means that there may potentially be data points that are used multiple times. For instance, if at some point an industry shift from phase 2 to 4, we study the five year time window leading up to that event and also the five years afterwards. But at t-3 for instance, there might also have occurred a phase shift from, let's say, phase 1 to 2. This event and the five years of data before and after will also enter the sample, which means that some data points occur twice (or even more times). One way to address this would be to exclude from the data overlapping periods or cases in which there are phase shifts preceding or following the phase shift event under study during the set horizon (in this case 5 years). This would come at the cost of greatly decreasing the sample size. In addition, it requires an arbitrary choice about which cases to maintain and which ones to drop. We calculate excess returns based on the available sample. The phase returns have been calculated by equally weighting the industry returns in (before/after) that phase. This means that each industry is represented equally.
+
+In terms of the interpretations of the results, the baseline result would be a flat line over the entire horizon. This would mean that markets do not react to phase shifts before or after the event. Basically, it means that phase shifts are not related to excess returns. Since the preceding section has already established that there is some relationship, this outcome is not likely - (maybe for some, but at least not for all phases). If the pre-event line is rising (declining) whereas the post-event line is declining (rising), this suggests overreaction. In the run-up to the phase shift, markets overreact, pushing the price further up (or down) than warranted by fair value, leading to a correction in the other direction after the event shift. The opposite, underreaction, occurs when the direction after the phase shift is the same as before; in that scenario, markets underappreciate the information from the phase shift and only gradually incorporate the information into market prices. The final scenario entails a movement in either direction in the run-up to the phase shift, followed by a flat line. That means markets anticipate on the phase shift and appropriately price in the event, meaning no abnormal returns can be earned after the event.
+
+Figure \ref{fig:EventStudy1-1} below shows the graphical presentation of the results for model 1. The grey area represents the upper and lower bound of the standard errors of the estimated mean. Table \ref{tab:EventStudy1-2} shows the results testing the whether the non-cumulative means in the run-up to the phase shift ("before") and after the phase shift ("after") are statistically different from zero. 
+
+```{r EventStudy1-1, fig.align = 'center', out.width = '80%', fig.cap = "\\label{fig:EventStudy1-1} Event Study, 5-year time window surrounding entry of new phase (model 1). The grey area around the black line represents the 95 percent confidence interval."}
+
+lst_IntDataModel <- readRDS("01 Processed Data/lst_IntDataModel1.rds")$PhaseDataModel1gsubind10yr
+
+PlotData <- ProcessPhaseData(df_Data = lst_IntDataModel,
+                 str_Year = "Year", str_Industry = "IndustryName", str_PhaseInput = "PreviousPhaseToCurrentPhase",
+                 str_TotalMarketCap = "TotalMarketCap", str_IndustryVWR = "IndustryVWR",
+                 int_PhasePeriodLength = 5, bool_OnlyFullResults = TRUE, bool_AggregateToPhase = TRUE) %>%
+  filter(PhaseName != "No Phase")
+
+ggplot(data = PlotData, aes(x = Time, y = Phase_ExcessEWRCumulative, group = 1)) +
+  geom_line(data = PlotData) +
+  geom_vline(xintercept = which(PlotData$Time == "t=0"), linetype = "dotted", size = 1, color = "red") + 
+  geom_hline(yintercept = 0, alpha = 0.25) +
+  geom_ribbon(aes(ymin = Phase_ExcessEWRCumulative - CumulativeSE * 1.96, ymax = Phase_ExcessEWRCumulative + CumulativeSE * 1.96), fill = "grey70", alpha = 0.5) +
+  theme(legend.position = "none") +
+  facet_wrap( ~ PhaseNameAndSampleSize)
+
+```
+
+```{r EventStudy1-2, fig.align = 'center', out.width = '80%', fig.cap = "\\label{tab:EventStudy1-2}"}
+
+lst_IntDataModel <- readRDS("01 Processed Data/lst_IntDataModel1.rds")$PhaseDataModel1gsubind10yr
+
+TableData <- ProcessPhaseData(df_Data = lst_IntDataModel,
+                 str_Year = "Year", str_Industry = "IndustryName", str_PhaseInput = "PreviousPhaseToCurrentPhase",
+                 str_TotalMarketCap = "TotalMarketCap", str_IndustryVWR = "IndustryVWR",
+                 int_PhasePeriodLength = 5, bool_OnlyFullResults = TRUE, bool_AggregateToPhase = FALSE) %>%
+  mutate(BeforeAfterShift = case_when(substr(Time, 3, 3) == "-" ~ "1. Before",
+                                      substr(Time, 3, 3) == 0 ~ "",
+                                      TRUE ~ "2. After")) %>%
+  mutate(BeforeAfterShift = as.factor(BeforeAfterShift),
+         PhaseName = as.factor(PhaseName))
+
+t_test1_before <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 1, BeforeAfterShift == "1. Before"), SampleIndustryExcessReturn)))
+t_test1_after <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 1, BeforeAfterShift == "2. After"), SampleIndustryExcessReturn)))
+t_test2_before <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 2, BeforeAfterShift == "1. Before"), SampleIndustryExcessReturn)))
+t_test2_after <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 2, BeforeAfterShift == "2. After"), SampleIndustryExcessReturn)))
+t_test3_before <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 3, BeforeAfterShift == "1. Before"), SampleIndustryExcessReturn)))
+t_test3_after <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 3, BeforeAfterShift == "2. After"), SampleIndustryExcessReturn)))
+t_test4_before <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 4, BeforeAfterShift == "1. Before"), SampleIndustryExcessReturn)))
+t_test4_after <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 4, BeforeAfterShift == "2. After"), SampleIndustryExcessReturn)))
+t_test5_before <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 5, BeforeAfterShift == "1. Before"), SampleIndustryExcessReturn)))
+t_test5_after <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 5, BeforeAfterShift == "2. After"), SampleIndustryExcessReturn)))
+
+OutputTable <- data.frame("Phase" = paste0("Phase ", c(1:5)),
+                          "Mean" = round(c(t_test1_before$estimate, t_test2_before$estimate, t_test3_before$estimate, t_test4_before$estimate, t_test5_before$estimate), 3),
+                          "t-value" = round(c(t_test1_before$statistic, t_test2_before$statistic, t_test3_before$statistic, t_test4_before$statistic, t_test5_before$statistic), 2),
+                          "p-value" = round(c(t_test1_before$p.value, t_test2_before$p.value, t_test3_before$p.value, t_test4_before$p.value, t_test5_before$p.value), 4),
+                          "Mean" = round(c(t_test1_after$estimate, t_test2_after$estimate, t_test3_after$estimate, t_test4_after$estimate, t_test5_after$estimate), 3),
+                          "t-value" = round(c(t_test1_after$statistic, t_test2_after$statistic, t_test3_after$statistic, t_test4_after$statistic, t_test5_after$statistic), 2),
+                          "p-value" = round(c(t_test1_after$p.value, t_test2_after$p.value, t_test3_after$p.value, t_test4_after$p.value, t_test5_after$p.value), 4))
+
+rownames(OutputTable) <- NULL
+colnames(OutputTable) <- NULL
+
+kable(OutputTable, "latex", booktabs = TRUE, caption = "Model 1: results from t-test on average excess (non-cumulative) returns before/after phase shift") %>%
+  add_header_above(c("Phase", rep(c("Mean", "t-value", "p-value"), 2))) %>%
+  add_header_above(c("", "Pre Event" = 3, "Post Event" = 3)) %>%
+  kable_styling(latex_options = c("hold_position"))
+
+```
+
+The results from the model 1 show no sign of overreaction, as none of the post-event statistics that are in the opposite direction of the pre-event statistics are significantly different from 0. For _Phase 3: Shake-out_ there is evidence of underreaction; suggesting investors underappreciate the information from industries in the shake-out phase. The mean excess returns for the pre-event run-up  are, for 4 out of 5 phases (exception being _Phase 4: Consolidation_), significantly different from zero. These results suggests that markets are quite adept at incorporating the information relevant to phase shifts. We should not forget that the phase models in this study are based on quite simple design parameters, using arbitrary cut-offs on when industries fit which phase. In practice, industries might gradually move to being a "growing" industry or a "declining" industry. The results however, provide evidence that markets do pick up this information effectively and reflect it in market expectations with such accuracy that there is no material correction afterwards. This applies in particular to _Phase 1: Birth_ which is characterized by substantial abnormal returns (`r round(t_test1_before$statistic, 3) ` p.a.) in the run-up to becoming a "new industry"; and the opposite can be seen for _Phase 5: Decline_ (`r round(t_test5_before$statistic, 3) ` p.a.). Conventional wisdom is correct in the sense that growing industries are associated with high abnormal returns, and the inverse holding for declining industries. Yet this informational advantage may not be easily exploited: markets are efficient in the sense that they gradually incorporate this information in advance of the phase shift.
+
+
+### Event study results: model 2
+
+Below follows the exact same analyses as discussed above, for model 2.
+
+```{r EventStudy2-1, fig.align = 'center', out.width = '80%', fig.cap = "\\label{fig:EventStudy2-1} Event Study, 5-year time window surrounding entry of new phase (model 2). The grey area around the black line represents the 95 percent confidence interval."}
+
+lst_IntDataModel <- readRDS("01 Processed Data/lst_IntDataModel2.rds")$PhaseDataModel2gsubind10yr
+
+PlotData <- ProcessPhaseData(df_Data = lst_IntDataModel,
+                 str_Year = "Year", str_Industry = "IndustryName", str_PhaseInput = "PreviousPhaseToCurrentPhase",
+                 str_TotalMarketCap = "TotalMarketCap", str_IndustryVWR = "IndustryVWR",
+                 int_PhasePeriodLength = 5, bool_OnlyFullResults = TRUE, bool_AggregateToPhase = TRUE)
+
+ggplot(data = PlotData, aes(x = Time, y = Phase_ExcessEWRCumulative, group = 1)) +
+  geom_line(data = PlotData) +
+  geom_vline(xintercept = which(PlotData$Time == "t=0"), linetype = "dotted", size = 1, color = "red") + 
+  geom_hline(yintercept = 0, alpha = 0.25) +
+  geom_ribbon(aes(ymin = Phase_ExcessEWRCumulative - CumulativeSE * 1.96, ymax = Phase_ExcessEWRCumulative + CumulativeSE * 1.96), fill = "grey70", alpha = 0.5) +
+  theme(legend.position = "none") +
+  facet_wrap( ~ PhaseNameAndSampleSize)
+
+```
+
+```{r EventStudy2-2, fig.align = 'center', out.width = '80%', fig.cap = "\\label{tab:EventStudy2-2} Statistical test of mean differences before and after entry of new phase (model 2, 5 year period surrounding phase shift)"}
+
+lst_IntDataModel <- readRDS("01 Processed Data/lst_IntDataModel2.rds")$PhaseDataModel2gsubind10yr
+
+TableData <- ProcessPhaseData(df_Data = lst_IntDataModel,
+                 str_Year = "Year", str_Industry = "IndustryName", str_PhaseInput = "PreviousPhaseToCurrentPhase",
+                 str_TotalMarketCap = "TotalMarketCap", str_IndustryVWR = "IndustryVWR",
+                 int_PhasePeriodLength = 5, bool_OnlyFullResults = TRUE, bool_AggregateToPhase = FALSE) %>%
+  mutate(BeforeAfterShift = case_when(substr(Time, 3, 3) == "-" ~ "1. Before",
+                                      substr(Time, 3, 3) == 0 ~ "",
+                                      TRUE ~ "2. After")) %>%
+  mutate(BeforeAfterShift = as.factor(BeforeAfterShift),
+         PhaseName = as.factor(PhaseName))
+
+t_test1_before <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 1, BeforeAfterShift == "1. Before"), SampleIndustryExcessReturn)))
+t_test1_after <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 1, BeforeAfterShift == "2. After"), SampleIndustryExcessReturn)))
+t_test2_before <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 2, BeforeAfterShift == "1. Before"), SampleIndustryExcessReturn)))
+t_test2_after <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 2, BeforeAfterShift == "2. After"), SampleIndustryExcessReturn)))
+t_test3_before <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 3, BeforeAfterShift == "1. Before"), SampleIndustryExcessReturn)))
+t_test3_after <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 3, BeforeAfterShift == "2. After"), SampleIndustryExcessReturn)))
+t_test4_before <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 4, BeforeAfterShift == "1. Before"), SampleIndustryExcessReturn)))
+t_test4_after <- t.test(as.matrix(select(filter(TableData, PhaseEvent == 4, BeforeAfterShift == "2. After"), SampleIndustryExcessReturn)))
+
+OutputTable <- data.frame("Phase" = paste0("Phase ", c(1:4)),
+                          "Mean" = round(c(t_test1_before$estimate, t_test2_before$estimate, t_test3_before$estimate, t_test4_before$estimate), 3),
+                          "t-value" = round(c(t_test1_before$statistic, t_test2_before$statistic, t_test3_before$statistic, t_test4_before$statistic), 2),
+                          "p-value" = round(c(t_test1_before$p.value, t_test2_before$p.value, t_test3_before$p.value, t_test4_before$p.value), 4),
+                          "Mean" = round(c(t_test1_after$estimate, t_test2_after$estimate, t_test3_after$estimate, t_test4_after$estimate), 3),
+                          "t-value" = round(c(t_test1_after$statistic, t_test2_after$statistic, t_test3_after$statistic, t_test4_after$statistic), 2),
+                          "p-value" = round(c(t_test1_after$p.value, t_test2_after$p.value, t_test3_after$p.value, t_test4_after$p.value), 4))
+
+rownames(OutputTable) <- NULL
+colnames(OutputTable) <- NULL
+
+kable(OutputTable, "latex", booktabs = TRUE, caption = "Model 2: results from t-test on average excess (non-cumulative) returns before/after phase shift") %>%
+  add_header_above(c("Phase", rep(c("Mean", "t-value", "p-value"), 2))) %>%
+  add_header_above(c("", "Pre Event" = 3, "Post Event" = 3)) %>%
+  kable_styling(latex_options = c("hold_position"))
+
+```
+
+Based on the results for model 2 we do not find evidence suggesting that markets either over- or underreact to phase shifts. None of the post-event statistics is significantly different from 0. The overreaction we found for Model 1's _Phase 3: Shake-out_, which matches closely with Model 2's _Technological Change_ cannot be confirmed by model 2. Moreover, a difference we find is that the run-up to the growth phase in model 2 is positive but not significant, as it was in model 1. The run-up to the phase shift to decline is negative with a t-statistic significantly different from 0, like in the model 1 results.
+
+The results we find are not in line with the initial answers we formulated for the research questions:
+
+- Research question II: We expect that financial markets do not properly reflect information about the long term development of industries classified as _growing_. This might be caused through either under- or overreaction.
+
+- Research question III: We expect that financial markets do not properly reflect information about the long term development of industries classified as _declining_. The information is overlooked and investors show signs of underreaction.
+
+In contrast to our earlier expectation based on the literature, we find no convincing evidence of systematic under- or overreaction in growing or declining industries; nor for other stages of industrial development. This conclusion applies to both empirical models we constructed.
+
+Although the research questions in this paper have specifically focused on growing and declining industries, the findings with regard to industries that are in the consolidating/shake-out phase are worth mentioning. The excess returns tend to be negative in this phase and evidence for investor _under_ reaction has been found. Explaining these results are difficult in particular because of the lack of definition of this phase in the literature, as evidenced by the widely diverging results from the _consolidation_ phase in model 1 versus model 2.  
+
+## Section 4: Conclusion
+
+In this paper, we investigate the relation between long term industrial development and financial markets' response. We classify industries by their level of development according to two different models and find that these phases are associated with differing levels of excess stock returns. Although there are differences in outcome across the two models, we find evidence that growth industries are associated with positive excess returns, whereas declining industries are associated with negative excess returns. Moreover, this relationship also holds up in predictive regressions on future returns. These results suggest that, in line with conventional wisdom, growing industries are better investments than declining industries. Across most of the models and analyses performed, declining industries are associated with negative excess returns. Although the findings in this paper look promising, these results should be confirmed in other samples and using varying methodologies. Also, we find evidence that markets gradually reflect relevant information in advance of phase shifts, implying that this information may not easily be used to harvest excess returns.
+
+We do not find evidence for widespread over- or underreaction in growing or declining industries. This is an interesting outcome, in particular for growing industries. These types of industries are commonly believed to be prone to hype and speculatory pressure on asset pricing. The results in this paper have two explanations. First, we must be open to the risk of model misspecification, i.e. the models we constructed do not properly distinguish between growing and declining industries. This is one of the first papers to systematically classify industries as being growth industries. We have seen that there are various methodological challenges, the most important one being whether the industry classification system used is suitable for studying dynamics and changes in industries over many decades.
+
+But the second explanation cannot be ruled out either: the results in this paper show that once we take a systematic approach to identify growing industries, there is no evidence of overreaction and formation of bubbles in asset pricing. Markets gradually process and reflect the relevant information flow in advance of the phase shift. This is consistent with the notion that much of the extant literature is too focused on identifying and studying bubble-like industries ex-post, where there is risk of a bias in sample selection. The results in this paper suggest some conventional wisdoms have to be challenged: that on an ex-ante basis, it is far more difficult to identify bubble-like industries; that growing industries aren't more prone to overreaction than industries in a different development phase; and that the behavioural narrative popularized through much of the bubble-literature - overreaction is caused by investors overestimating growth potential and extrapolating current high levels of growth - may not offer the best explanation and that instead, a risk-based narrative may be more applicable.
+
+
+
+\clearpage
+
+# References
+
+<div id="refs"></div>
+
+
+\clearpage
+
+# Appendix
+
+All raw code that was used to produce the results in this paper can be found on [this GitHub page](https://github.com/mversaevel/under-the-hood). The appendix below provides some additional figures and background, until a more detailed internet appendix will be uploaded online.
+
+### Transition model for phase 2
+
+```{r TransitionMatrixModel2, fig.cap = "\\label{tab:TransitionMatrixModel2} Model 2: Transition matrix showing the transition to the current phase from the previous phase (_from_ is at t=-1; _to_ is at t=0)"}
+
+df_IntDataModel2 <- readRDS("01 Processed Data/lst_IntDataModel2.rds")$PhaseDataModel2gsubind10yr
+  
+TableDataModel2 <- CreateTransitionMatrix(df_Data = df_IntDataModel2, 
+                                    str_PhaseInput = "PreviousPhaseToCurrentPhase", OutputProbabilities = TRUE, Formatted = TRUE)
+
+knitr::kable(TableDataModel2, "latex", booktabs = TRUE, caption = "Transition matrix for model 2") %>%
+  kable_styling(latex_options = c("hold_position")) %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(1, bold = TRUE)
+
+```
+
+\clearpage
+
+### Robustness check phase study model 1 - alternative settings
+
+```{r EventStudy1-Robustness, fig.align = 'center', out.width = '80%', fig.cap = "\\label{fig:EventStudy1-Robustness} Robustness checks on event study: 5-year time window surrounding entry of new phase (model 1) using various alternative settings. The black line represents the standard setting used throughout this study. The other lines each differ on one dimension, while keeping the others equal. The blue line selects industries at the GICS-3 (industry) level. The green line shows a 5-year instead of 10-year horizon for constructing the metrics underpinning the phases. The yellow line retains incomplete samples in the event study, when there is no 5 years of financial data available before and after the phase shift."}
+
+lst_IntDataModel <- readRDS("01 Processed Data/lst_IntDataModel1.rds")$PhaseDataModel1gsubind10yr
+lst_IntDataModelVar1 <- readRDS("01 Processed Data/lst_IntDataModel1.rds")$PhaseDataModel1gind10yr
+lst_IntDataModelVar2 <- readRDS("01 Processed Data/lst_IntDataModel1.rds")$PhaseDataModel1gsubind5yr
+
+PlotData <- ProcessPhaseData(df_Data = lst_IntDataModel,
+                 str_Year = "Year", str_Industry = "IndustryName", str_PhaseInput = "PreviousPhaseToCurrentPhase",
+                 str_TotalMarketCap = "TotalMarketCap", str_IndustryVWR = "IndustryVWR",
+                 int_PhasePeriodLength = 5, bool_OnlyFullResults = TRUE, bool_AggregateToPhase = TRUE) %>%
+  filter(PhaseName != "No Phase")
+
+PlotDataVar1 <- ProcessPhaseData(df_Data = lst_IntDataModelVar1,
+                 str_Year = "Year", str_Industry = "IndustryName", str_PhaseInput = "PreviousPhaseToCurrentPhase",
+                 str_TotalMarketCap = "TotalMarketCap", str_IndustryVWR = "IndustryVWR",
+                 int_PhasePeriodLength = 5, bool_OnlyFullResults = TRUE, bool_AggregateToPhase = TRUE) %>%
+  filter(PhaseName != "No Phase")
+
+PlotDataVar2 <- ProcessPhaseData(df_Data = lst_IntDataModelVar2,
+                 str_Year = "Year", str_Industry = "IndustryName", str_PhaseInput = "PreviousPhaseToCurrentPhase",
+                 str_TotalMarketCap = "TotalMarketCap", str_IndustryVWR = "IndustryVWR",
+                 int_PhasePeriodLength = 5, bool_OnlyFullResults = TRUE, bool_AggregateToPhase = TRUE) %>%
+  filter(PhaseName != "No Phase")
+
+PlotDataVar3 <- ProcessPhaseData(df_Data = lst_IntDataModel,
+                 str_Year = "Year", str_Industry = "IndustryName", str_PhaseInput = "PreviousPhaseToCurrentPhase",
+                 str_TotalMarketCap = "TotalMarketCap", str_IndustryVWR = "IndustryVWR",
+                 int_PhasePeriodLength = 5, bool_OnlyFullResults = FALSE, bool_AggregateToPhase = TRUE) %>%
+  filter(PhaseName != "No Phase")
+
+
+ggplot(data = PlotData, aes(x = Time, y = Phase_ExcessEWRCumulative, group = 1)) +
+  geom_line(data = PlotData) +
+  geom_line(data = PlotDataVar1, color = "blue") +
+  geom_line(data = PlotDataVar2, color = "green") +
+  geom_line(data = PlotDataVar3, color = "yellow") +
+  geom_vline(xintercept = which(PlotData$Time == "t=0"), linetype = "dotted", size = 1, color = "red") + 
+  geom_hline(yintercept = 0, alpha = 0.25) +
+  #geom_ribbon(aes(ymin = Phase_ExcessEWRCumulative - CumulativeSE * 1.96, ymax = Phase_ExcessEWRCumulative + CumulativeSE * 1.96), fill = "grey70", alpha = 0.5) +
+  theme(legend.position = "none") +
+  facet_wrap( ~ PhaseName)
+
+```
+
+\clearpage
+
+### Robustness check phase study model 2 - alternative settings
+
+```{r EventStudy2-Robustness, fig.align = 'center', out.width = '80%', fig.cap = "\\label{fig:EventStudy2-Robustness} Robustness checks on event study: 5-year time window surrounding entry of new phase (model 2) using various alternative settings. The black line represents the standard setting used throughout this study. The other lines each differ on one dimension, while keeping the others equal. The blue line selects industries at the GICS-3 (industry) level. The green line shows a 5-year instead of 10-year horizon for constructing the metrics underpinning the phases. The yellow line retains incomplete samples in the event study, when there is no 5 years of financial data available before and after the phase shift."}
+
+lst_IntDataModel <- readRDS("01 Processed Data/lst_IntDataModel2.rds")$PhaseDataModel2gsubind10yr
+lst_IntDataModelVar1 <- readRDS("01 Processed Data/lst_IntDataModel2.rds")$PhaseDataModel2gind10yr
+lst_IntDataModelVar2 <- readRDS("01 Processed Data/lst_IntDataModel2.rds")$PhaseDataModel2gsubind5yr
+
+PlotData <- ProcessPhaseData(df_Data = lst_IntDataModel,
+                 str_Year = "Year", str_Industry = "IndustryName", str_PhaseInput = "PreviousPhaseToCurrentPhase",
+                 str_TotalMarketCap = "TotalMarketCap", str_IndustryVWR = "IndustryVWR",
+                 int_PhasePeriodLength = 5, bool_OnlyFullResults = TRUE, bool_AggregateToPhase = TRUE)
+
+PlotDataVar1 <- ProcessPhaseData(df_Data = lst_IntDataModelVar1,
+                 str_Year = "Year", str_Industry = "IndustryName", str_PhaseInput = "PreviousPhaseToCurrentPhase",
+                 str_TotalMarketCap = "TotalMarketCap", str_IndustryVWR = "IndustryVWR",
+                 int_PhasePeriodLength = 5, bool_OnlyFullResults = TRUE, bool_AggregateToPhase = TRUE) 
+
+PlotDataVar2 <- ProcessPhaseData(df_Data = lst_IntDataModelVar2,
+                 str_Year = "Year", str_Industry = "IndustryName", str_PhaseInput = "PreviousPhaseToCurrentPhase",
+                 str_TotalMarketCap = "TotalMarketCap", str_IndustryVWR = "IndustryVWR",
+                 int_PhasePeriodLength = 5, bool_OnlyFullResults = TRUE, bool_AggregateToPhase = TRUE)
+
+PlotDataVar3 <- ProcessPhaseData(df_Data = lst_IntDataModel,
+                 str_Year = "Year", str_Industry = "IndustryName", str_PhaseInput = "PreviousPhaseToCurrentPhase",
+                 str_TotalMarketCap = "TotalMarketCap", str_IndustryVWR = "IndustryVWR",
+                 int_PhasePeriodLength = 5, bool_OnlyFullResults = FALSE, bool_AggregateToPhase = TRUE) 
+
+ggplot(data = PlotData, aes(x = Time, y = Phase_ExcessEWRCumulative, group = 1)) +
+  geom_line(data = PlotData) +
+  geom_line(data = PlotDataVar1, color = "blue") +
+  geom_line(data = PlotDataVar2, color = "green") +
+  geom_line(data = PlotDataVar3, color = "yellow") +
+  geom_vline(xintercept = which(PlotData$Time == "t=0"), linetype = "dotted", size = 1, color = "red") + 
+  geom_hline(yintercept = 0, alpha = 0.25) +
+  #geom_ribbon(aes(ymin = Phase_ExcessEWRCumulative - CumulativeSE * 1.96, ymax = Phase_ExcessEWRCumulative + CumulativeSE * 1.96), fill = "grey70", alpha = 0.5) +
+  theme(legend.position = "none") +
+  facet_wrap( ~ PhaseName)
+
+```
+
+
+
+
+\clearpage
+
+### boxplot regressions model 1
+
+```{r Model1_BoxPlot, fig.align = "center", out.width = "70%", fig.height = 8, fig.width = 8, fig.cap = "\\label{fig:Model1_BoxPlot} Distribution of annual returns by phase - including higher moment stats (model 1)"}
+
+GraphData <- readRDS("01 Processed Data/lst_IntDataModel1.rds")$PhaseDataModel1gsubind10yr %>%
+  mutate(Phase = as.factor(Phase)) %>%
+  filter(Phase != 0)
+
+Stats <- GraphData %>%
+  group_by(PhaseName) %>%
+  summarize(mean = round(mean(IndustryVWR_Excess), 2),
+            sd = round(sd(IndustryVWR_Excess), 2),
+            skewness = round(moments::skewness(IndustryVWR_Excess), 2),
+            kurtosis = round(moments::kurtosis(IndustryVWR_Excess), 2))
+
+ggplot(GraphData, aes(x = PhaseName, y = IndustryVWR_Excess)) + 
+  geom_boxplot(fill = "grey80", colour = "blue") +
+  geom_label(aes(x = PhaseName, y = mean(GraphData$IndustryVWR_Excess), label = paste0("Mean: ", mean)), data = Stats) +
+  geom_label(aes(x = PhaseName, y = max(GraphData$IndustryVWR_Excess), vjust = -2.6, label = paste0("SD: ", sd)), data = Stats) +
+  geom_label(aes(x = PhaseName, y = max(GraphData$IndustryVWR_Excess), vjust = -1.4, label = paste0("Skew: ", skewness)), data = Stats) +
+  geom_label(aes(x = PhaseName, y = max(GraphData$IndustryVWR_Excess), vjust = -0.2, label = paste0("Kurtosis: ", kurtosis)), data = Stats) +
+  scale_y_continuous(name = "Excess returns (annual)",
+                     limits = c( min(GraphData$IndustryVWR_Excess) - sd(GraphData$IndustryVWR_Excess), max(GraphData$IndustryVWR_Excess) + sd(GraphData$IndustryVWR_Excess)))
+
+```
+
+\clearpage
+
+### boxplot regressions model 2
+
+```{r Model2_BoxPlot, fig.align = "center", out.width = "70%", fig.height = 8, fig.width = 8, fig.cap = "\\label{fig:Model2_BoxPlot} Distribution of annual returns by phase - including higher moment stats (model 2)"}
+
+GraphData <- readRDS("01 Processed Data/lst_IntDataModel2.rds")$PhaseDataModel2gsubind10yr %>%
+  mutate(Phase = as.factor(Phase))
+
+Stats <- GraphData %>%
+  group_by(PhaseName) %>%
+  summarize(mean = round(mean(IndustryVWR_Excess), 2),
+            sd = round(sd(IndustryVWR_Excess), 2),
+            skewness = round(moments::skewness(IndustryVWR_Excess), 2),
+            kurtosis = round(moments::kurtosis(IndustryVWR_Excess), 2))
+
+ggplot(GraphData, aes(x = PhaseName, y = IndustryVWR_Excess)) + 
+  geom_boxplot(fill = "grey80", colour = "blue") +
+  geom_label(aes(x = PhaseName, y = mean(GraphData$IndustryVWR_Excess), label = paste0("Mean: ", mean)), data = Stats) +
+  geom_label(aes(x = PhaseName, y = max(GraphData$IndustryVWR_Excess), vjust = -2.6, label = paste0("SD: ", sd)), data = Stats) +
+  geom_label(aes(x = PhaseName, y = max(GraphData$IndustryVWR_Excess), vjust = -1.4, label = paste0("Skew: ", skewness)), data = Stats) +
+  geom_label(aes(x = PhaseName, y = max(GraphData$IndustryVWR_Excess), vjust = -0.2, label = paste0("Kurtosis: ", kurtosis)), data = Stats) +
+  scale_y_continuous(name = "Excess returns (annual)",
+                     limits = c( min(GraphData$IndustryVWR_Excess) - sd(GraphData$IndustryVWR_Excess), max(GraphData$IndustryVWR_Excess) + sd(GraphData$IndustryVWR_Excess)))
+
+
+```
+
+\clearpage
+
+### boxplot predictive regressions (model 1 and model 2)
+
+
+```{r Model1_Model2_BoxPlot2, fig.align = "center", out.width = "100%", fig.height = 12, fig.width = 12, fig.cap = "\\label{fig:Model1_Model2_BoxPlot2} Distribution of annual returns by phase - including higher moment stats (model 1)"}
+
+GraphData1 <- readRDS("01 Processed Data/lst_IntDataModel1.rds")$PhaseDataModel1gsubind10yr %>%
+  mutate(Phase = as.factor(Phase)) %>%
+  filter(!is.na(IndustryVWR_Excess5yrForward), Phase != 0)
+
+GraphData2 <- readRDS("01 Processed Data/lst_IntDataModel2.rds")$PhaseDataModel2gsubind10yr %>%
+  mutate(Phase = as.factor(Phase)) %>%
+  filter(!is.na(IndustryVWR_Excess5yrForward))
+
+Stats1 <- GraphData1 %>%
+  group_by(PhaseName) %>%
+  summarize(mean = round(mean(IndustryVWR_Excess5yrForward), 2),
+            sd = round(sd(IndustryVWR_Excess5yrForward), 2),
+            skewness = round(moments::skewness(IndustryVWR_Excess5yrForward), 2),
+            kurtosis = round(moments::kurtosis(IndustryVWR_Excess5yrForward), 2))
+
+Stats2 <- GraphData2 %>%
+  group_by(PhaseName) %>%
+  summarize(mean = round(mean(IndustryVWR_Excess5yrForward), 2),
+            sd = round(sd(IndustryVWR_Excess5yrForward), 2),
+            skewness = round(moments::skewness(IndustryVWR_Excess5yrForward), 2),
+            kurtosis = round(moments::kurtosis(IndustryVWR_Excess5yrForward), 2))
+
+p1 <- ggplot(GraphData1, aes(x = PhaseName, y = IndustryVWR_Excess5yrForward)) + 
+  geom_boxplot(fill = "grey80", colour = "blue") +
+  ggtitle(label = "Model 1") +
+  geom_label(aes(x = PhaseName, y = mean(GraphData1$IndustryVWR_Excess5yrForward), label = paste0("Mean: ", mean)), data = Stats1) +
+  geom_label(aes(x = PhaseName, y = max(GraphData1$IndustryVWR_Excess5yrForward), vjust = -2.6, label = paste0("SD: ", sd)), data = Stats1) +
+  geom_label(aes(x = PhaseName, y = max(GraphData1$IndustryVWR_Excess5yrForward), vjust = -1.4, label = paste0("Skew: ", skewness)), data = Stats1) +
+  geom_label(aes(x = PhaseName, y = max(GraphData1$IndustryVWR_Excess5yrForward), vjust = -0.2, label = paste0("Kurtosis: ", kurtosis)), data = Stats1) +
+  scale_y_continuous(name = "Value weighted returns",
+                     limits = c( min(GraphData1$IndustryVWR_Excess5yrForward) - sd(GraphData1$IndustryVWR_Excess5yrForward), max(GraphData1$IndustryVWR_Excess5yrForward) + sd(GraphData1$IndustryVWR_Excess5yrForward)))
+
+p2 <- ggplot(GraphData2, aes(x = PhaseName, y = IndustryVWR_Excess5yrForward)) + 
+  geom_boxplot(fill = "grey80", colour = "blue") +
+  ggtitle(label = "Model 2") +
+  geom_label(aes(x = PhaseName, y = mean(GraphData2$IndustryVWR_Excess5yrForward), label = paste0("Mean: ", mean)), data = Stats2) +
+  geom_label(aes(x = PhaseName, y = max(GraphData2$IndustryVWR_Excess5yrForward), vjust = -2.6, label = paste0("SD: ", sd)), data = Stats2) +
+  geom_label(aes(x = PhaseName, y = max(GraphData2$IndustryVWR_Excess5yrForward), vjust = -1.4, label = paste0("Skew: ", skewness)), data = Stats2) +
+  geom_label(aes(x = PhaseName, y = max(GraphData2$IndustryVWR_Excess5yrForward), vjust = -0.2, label = paste0("Kurtosis: ", kurtosis)), data = Stats2) +
+  scale_y_continuous(name = "Value weighted returns",
+                     limits = c( min(GraphData2$IndustryVWR_Excess5yrForward) - sd(GraphData2$IndustryVWR_Excess5yrForward), max(GraphData2$IndustryVWR_Excess5yrForward) + sd(GraphData2$IndustryVWR_Excess5yrForward)))
+
+p1 + p2
+
+```
+
+
+
